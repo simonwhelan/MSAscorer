@@ -64,7 +64,12 @@ int main(int argc, char * argv[]) {
 	// Read data and do some checking
 	testData = ReadSequences(testFile); // Reads the sequences
 	refData = ReadSequences(refFile);
-	if(testData->size() != refData->size()) {  cout << "\nError: test and reference MSAs have different number of sequences"; }
+	sort(testData->begin(), testData->end(),[](CSequence &a, CSequence&b) { return a.Name() < b.Name(); });
+	sort(refData->begin(), refData->end(),[](CSequence &a, CSequence&b) { return a.Name() < b.Name(); });
+	if(testData->size() != refData->size()) {  cout << "\nError: test and reference MSAs have different number of sequences"; exit(-1); }
+	for(int i = 0 ; i < testData->size(); i++) {
+		if(testData->at(i).Name() != refData->at(i).Name()) { cout << "\nError: test ("<< testData->at(i).Name()<< ")and ref ("<< refData->at(i).Name() << ") have different names?\n"; exit(-1); }
+	}
 	// Check the test
 	assert(!testData->empty());
 	for(auto & s : *testData) {
