@@ -71,8 +71,28 @@ private:
 
 };
 
-// File reader
-std::vector <CSequence> *FASTAReader(std::string SeqFile);
+// File readers
+enum EFileType { FASTA, MSF, Phylip, Interleaved };
+inline std::string FileTypeName(EFileType type) {
+	switch(type) {
+	case FASTA:
+		return "FASTA";
+	case MSF:
+		return "MSF";
+	case Phylip:
+		return "Phylip";
+	case Interleaved:
+		return "Interleaved";
+	default:
+		std::cout << "\nUknown FileTypeName..."; exit(-1);
+	}
+}
+EFileType TestFile(std::string seqFile);
+std::vector <CSequence> *ReadSequences(std::string seqFile);
+std::vector <CSequence> *FASTAReader(std::string seqFile);
+std::vector <CSequence> *MSFReader(std::string seqFile);
+std::vector <CSequence> *PhylipReader(std::string seqFile);
+std::vector <CSequence> *InterleavedReader(std::string seqFile);
 
 // Other minor tools
 template <class TRange> bool InRange(TRange Val, TRange LowerBound, TRange UpperBound) { return ( !(Val < LowerBound) && ( Val < UpperBound) ); }
@@ -111,7 +131,7 @@ inline std::string read_line(std::istream &in) {
 }
 
 inline bool IsGap(char c) {
-	std::string gaps = "*-X?";
+	std::string gaps = ".*-X?";
 	if(std::find(gaps.begin(),gaps.end(),c) != gaps.end()) { return true; }
 	return false;
 }

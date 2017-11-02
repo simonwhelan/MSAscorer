@@ -62,8 +62,8 @@ int main(int argc, char * argv[]) {
 	string refFile = argv[2];
 
 	// Read data and do some checking
-	testData = FASTAReader(testFile); // Reads the sequences
-	refData = FASTAReader(refFile);
+	testData = ReadSequences(testFile); // Reads the sequences
+	refData = ReadSequences(refFile);
 	if(testData->size() != refData->size()) {  cout << "\nError: test and reference MSAs have different number of sequences"; }
 	// Check the test
 	assert(!testData->empty());
