@@ -51,7 +51,6 @@ string RemoveGaps(string &seq);
 tuple<vector<int>,vector<int>> MapPositions(string &x, string &y, string &z); // Maps x to y, with -1 for cases where x doesn't occur in y; uses the second reference sequence z to ignore gaps
 vector <tuple<int,int>> MakePairs(vector<int> &x,vector<int> &y);
 int CountTP(vector <tuple<int,int> > &x);
-int CountFP(vector <tuple<int,int> > &x);
 
 int main(int argc, char * argv[]) {
 	SScore score;
@@ -116,7 +115,7 @@ SScore ComparePairs(tuple<string, string> seq1, tuple<string, string> seq2) {
 	retScore.totalRef = refPairs.size();
 	retScore.TP = CountTP(testPairs);
 	retScore.FN = retScore.totalRef - retScore.TP;
-	retScore.FP = CountFP(testPairs);
+	retScore.FP = testPairs.size() - retScore.TP;
 	assert(retScore.FN >= 0);
 	return retScore;
 }
@@ -163,14 +162,6 @@ vector <tuple<int,int>> MakePairs(vector<int> &x,vector<int> &y) {
 int CountTP(vector <tuple<int,int> > &x) {
 	int count = 0;
 	for(auto &p : x) { if(get<0>(p) == get<1>(p)) { count++; } }
-	return count;
-}
-
-// Simply count the number where the tuples don't match and both are in the reference alignment
-int CountFP(vector <tuple<int,int> > &x) {
-	int count = 0;
-	for(auto &p : x) {
-		if(get<0>(p) != get<1>(p)) { count++; } }
 	return count;
 }
 
