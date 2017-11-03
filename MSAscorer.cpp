@@ -46,9 +46,9 @@ struct SScore {
 
 SScore ComparePairs(tuple<string, string> s1, tuple<string, string> s2); // Compare sequences s1/s2 with <test,ref> for each
 string RemoveGaps(string &seq);
-tuple<vector<int>,vector<int>> MapPositions(string &x, string &y);						// Maps x to y, with -1 for cases where x doesn't occur in y
+tuple<vector<int>,vector<int>> MapPositions(string &x, string &y, string &z); // Maps x to y, with -1 for cases where x doesn't occur in y; uses the second reference sequence z to ignore gaps
 vector <tuple<int,int>> MakePairs(vector<int> &x,vector<int> &y);
-int Intersection(vector <tuple<int,int> > &x, vector <tuple <int,int> > &y);
+int CountTP(vector <tuple<int,int> > &x);
 
 int main(int argc, char * argv[]) {
 	SScore score;
@@ -104,44 +104,43 @@ int main(int argc, char * argv[]) {
 SScore ComparePairs(tuple<string, string> seq1, tuple<string, string> seq2) {
 	SScore retScore;
 	// The pair of sequences referenced by position in y ; -1 used to denote gap or something not counted in x
-	tuple<vector<int>,vector<int>> s1_int = MapPositions(get<0>(seq1),get<1>(seq1));
-	tuple<vector<int>,vector<int>> s2_int = MapPositions(get<0>(seq2),get<1>(seq2));
+	tuple<vector<int>,vector<int>> s1_int = MapPositions(get<0>(seq1),get<1>(seq1),get<1>(seq2));
+	tuple<vector<int>,vector<int>> s2_int = MapPositions(get<0>(seq2),get<1>(seq2),get<1>(seq1));
 	vector <tuple<int,int> > testPairs = MakePairs(get<0>(s1_int),get<0>(s2_int));
 	vector <tuple<int,int> > refPairs = MakePairs(get<1>(s1_int),get<1>(s2_int));
 	// Transfer information to the score structure
 	retScore.totalTest = testPairs.size();
 	retScore.totalRef = refPairs.size();
-	retScore.TP = Intersection(testPairs,refPairs);
+	retScore.TP = CountTP(testPairs);
 	retScore.FN = retScore.totalRef - retScore.TP;
-//	cout << retScore << "\n" << flush;
 	assert(retScore.FN >= 0);
 	return retScore;
 }
 
-tuple<vector<int>,vector<int>> MapPositions(string &x, string &y) {
+// Map the reference sequence y onto the test sequence x. Uses the second reference sequence z to ensure gaps are handled correctly
+tuple<vector<int>,vector<int>> MapPositions(string &x, string &y, string &z) {
 	string x_clean = RemoveGaps(x);
 	string y_clean = RemoveGaps(y);
+	assert(y.size() == z.size());
 	vector <int> x_clean_int(x_clean.size(),-1), y_clean_int(y_clean.size(),-1); // The raw sequences unaligned
 	vector <int> x_int(x.size(),-1), y_int(y.size(),-1);		// The return
 	int start_x = (int) x_clean.find(y_clean);	// Get the position recast as int
+	int end_x = start_x + y_clean.size();
 	if(start_x == string::npos) { cout << "\nError: reference sequence is not a valid subset of the test sequence\ntest: " << x << "\nref:  " << y; exit(-1); }
-	// Create the map
-	for(int i = 0; i < y_clean_int.size(); i++) {
-		x_clean_int[i + start_x] = y_clean_int[i] = i;
-	}
-	// Now put it on the alignments
+	// Create the map for reference (y) based on the other reference (z)
 	int pos = 0;
-	for(int i = 0; i < x_int.size(); i++) {
-		if(IsGap(x[i])) { continue; }
-		x_int[i] = x_clean_int[pos++];
+	for(int i = 0; i < y.size(); i++) {
+		if(IsGap(z[i])) { y_int[i] = -i; }
+		else { y_int[i] = i; }
+		if(!IsGap(y[i])) { y_clean_int[pos++] = i; }
 	}
-	assert(pos == x_clean_int.size());
+	// Now build the x_int
 	pos = 0;
-	for(int i = 0; i < y_int.size(); i++) {
-		if(IsGap(y[i])) { continue; }
-		y_int[i] = y_clean_int[pos++];
+	for(int i = 0; i < x.size(); i++) {
+		if(IsGap(x[i])) { continue; }
+		if(pos < start_x || pos >= end_x) { pos++; continue; }
+		x_int[i] = y_clean_int[pos++ - start_x];
 	}
-	assert(pos == y_clean_int.size());
 	return tuple<vector<int>,vector<int>>(x_int,y_int);
 }
 
@@ -150,24 +149,17 @@ vector <tuple<int,int>> MakePairs(vector<int> &x,vector<int> &y) {
 	vector <tuple<int,int> > retPairs;
 	assert(x.size() == y.size());
 	for(int i = 0 ; i < x.size(); i++) {
-		if(x[i] == -1 || y[i] == -1) { continue; }
+		if(x[i] < 0 || y[i] < 0) { continue; }
 		retPairs.push_back(tuple<int,int>(x[i],y[i]));
 	}
 	return retPairs;
 }
 
-int Intersection(vector <tuple<int,int> > &x, vector <tuple <int,int> > &y) {
-	int lastMatch = 0, intersect = 0;
-	for(int i = 0; i < x.size(); i++) {
-		for(int j = lastMatch; j < y.size(); j++) {
-			if(get<0>(y[j]) > get<0>(x[i])) { break; }
-			if(get<1>(y[j]) > get<1>(y[j])) { break; }
-			if(x[i] == y[i]) {
-				intersect ++; lastMatch = j; break;
-			}
-		}
-	}
-	return intersect;
+// Simply count the number where the tuples match
+int CountTP(vector <tuple<int,int> > &x) {
+	int count = 0;
+	for(auto &p : x) { if(get<0>(p) == get<1>(p)) { count++; } }
+	return count;
 }
 
 string RemoveGaps(string &seq) {
