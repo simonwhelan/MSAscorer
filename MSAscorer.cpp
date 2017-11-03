@@ -131,15 +131,16 @@ int main(int argc, char * argv[]) {
 // Compare the pairs x and y <0: test, 1: ref> and return the score
 SScore ComparePairs(tuple<string, string> seq1, tuple<string, string> seq2) {
 	SScore retScore;
-	// The pair of sequences referenced by position in y
+	// Get labels for each of the sequences so we can identify and compare homology pairs; Detailed in the function
 	tuple<vector<int>,vector<int>> s1_int = MapPositions(get<0>(seq1),get<1>(seq1),get<1>(seq2));
 	tuple<vector<int>,vector<int>> s2_int = MapPositions(get<0>(seq2),get<1>(seq2),get<1>(seq1));
+	// From these labels construct all of the pairs where both characters are present in the reference (defined as both labels >= 0)
 	vector <tuple<int,int> > testPairs = MakePairs(get<0>(s1_int),get<0>(s2_int));
 	vector <tuple<int,int> > refPairs = MakePairs(get<1>(s1_int),get<1>(s2_int));
 	// Transfer information to the score structure
 	retScore.totalTest = testPairs.size();
 	retScore.totalRef = refPairs.size();
-	retScore.TP = CountTP(testPairs);
+	retScore.TP = CountTP(testPairs);					// Intersection of totalTest and totalRef, but can be computed more simply
 	retScore.FN = retScore.totalRef - retScore.TP;		// FNs are the
 	retScore.FP = testPairs.size() - retScore.TP;		// FPs are the size of testPairs that are not TP
 	assert(retScore.FN >= 0);
