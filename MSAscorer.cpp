@@ -32,11 +32,13 @@ string gapChar = "*-X?";
 
 struct SScore {
 	int TP = 0;				// Number of true pairs
+	int FP = 0;
 	int FN = 0;				// Number of pairs not captured in true alignment
 	int totalRef = 0;		// Number pairs in reference alignment
 	int totalTest = 0;		// Total number of pairs in test alignment
 	SScore operator+=(const SScore &S) {
 		TP += S.TP;
+		FP += S.FP;
 		FN += S.FN;
 		totalRef += S.totalRef;
 		totalTest += S.totalTest;
@@ -49,6 +51,7 @@ string RemoveGaps(string &seq);
 tuple<vector<int>,vector<int>> MapPositions(string &x, string &y, string &z); // Maps x to y, with -1 for cases where x doesn't occur in y; uses the second reference sequence z to ignore gaps
 vector <tuple<int,int>> MakePairs(vector<int> &x,vector<int> &y);
 int CountTP(vector <tuple<int,int> > &x);
+int CountFP(vector <tuple<int,int> > &x);
 
 int main(int argc, char * argv[]) {
 	SScore score;
@@ -94,8 +97,8 @@ int main(int argc, char * argv[]) {
 		}
 	}
 	int width = 15;
-	cout << left << "\n" << setw(width)<< "#TruePos"<< setw(width) <<"FalseNeg"<< setw(width) <<"totalRef";
-	cout << "\n" << setw(width) << score.TP << setw(width) << score.FN << setw(width) << score.totalRef;
+	cout << left << "\n" << setw(width)<< "#TruePos"<< setw(width) <<"FalsePos"<< setw(width) <<"FalseNeg"<< setw(width) <<"totalRef";
+	cout << "\n" << setw(width) << score.TP << setw(width) << score.FP << setw(width) << score.FN << setw(width) << score.totalRef;
 	cout << "\n";
 	return 0;
 }
@@ -113,6 +116,7 @@ SScore ComparePairs(tuple<string, string> seq1, tuple<string, string> seq2) {
 	retScore.totalRef = refPairs.size();
 	retScore.TP = CountTP(testPairs);
 	retScore.FN = retScore.totalRef - retScore.TP;
+	retScore.FP = CountFP(testPairs);
 	assert(retScore.FN >= 0);
 	return retScore;
 }
@@ -159,6 +163,14 @@ vector <tuple<int,int>> MakePairs(vector<int> &x,vector<int> &y) {
 int CountTP(vector <tuple<int,int> > &x) {
 	int count = 0;
 	for(auto &p : x) { if(get<0>(p) == get<1>(p)) { count++; } }
+	return count;
+}
+
+// Simply count the number where the tuples don't match and both are in the reference alignment
+int CountFP(vector <tuple<int,int> > &x) {
+	int count = 0;
+	for(auto &p : x) {
+		if(get<0>(p) != get<1>(p)) { count++; } }
 	return count;
 }
 
