@@ -122,7 +122,7 @@ tuple<vector<int>,vector<int>> MapPositions(string &x, string &y, string &z) {
 	string x_clean = RemoveGaps(x);
 	string y_clean = RemoveGaps(y);
 	assert(y.size() == z.size());
-	vector <int> x_clean_int(x_clean.size(),-1), y_clean_int(y_clean.size(),-1); // The raw sequences unaligned
+	vector <int> y_clean_int(y_clean.size(),-1); 				// The raw sequences unaligned
 	vector <int> x_int(x.size(),-1), y_int(y.size(),-1);		// The return
 	int start_x = (int) x_clean.find(y_clean);	// Get the position recast as int
 	int end_x = start_x + y_clean.size();
