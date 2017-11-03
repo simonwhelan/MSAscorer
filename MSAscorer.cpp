@@ -1,20 +1,10 @@
 /*
- * SeqFilter.cpp
+ * MSAscorer
  *
- *  Created on: 12 Sep 2017
- *      Author: simon
- *
+ *  Created on: 2 Nov 2017
+ *      Author: Simon Whelan
  *      ---
- *
- *      Main functions for performing filtering
- *
- *      //
- *
- *      Current idea list:
- *       * Run together removed regions, for example XXXARGNDEXXX -> XXXXXXXXXXXX so frameshifts are better caught
- *       * Beginning and end regions are too generous -- user should define run_inside
- *       * Need a full set of options and the beginning of documentation
- *       * Store bounds for particular sequences in the pairHMM so custom bounds are internalised and multiple calls are not needed.
+ *	Method for comparing a test MSA to a reference MSA, that may contain only a subset of the testMSA sequence for each OTU
  */
 
 
