@@ -149,7 +149,7 @@ tuple<vector<int>,vector<int>> MapPositions(string &x, string &y, string &z) {
 	string y_clean = RemoveGaps(y);
 	assert(y.size() == z.size());	// Check the aligned reference is correct
 	vector <int> y_clean_int(y_clean.size(),-BIG_NUMBER);	// Storage of character mapping
-	vector <int> x_int(x.size(),-1), y_int(y.size(),-BIG_NUMBER);		// The return vectors
+	vector <int> x_int(x.size(),-BIG_NUMBER), y_int(y.size(),-BIG_NUMBER);		// The return vectors
 	int start_x = (int) x_clean.find(y_clean);	// Get the real character position that y starts in clean_x, recast as int
 	int end_x = start_x + y_clean.size();		// Get the positon in clean_x where y is expected to end
 	if(start_x == string::npos) { cout << "\nError: reference sequence is not a valid subset of the test sequence\ntest: " << x << "\nref:  " << y; exit(-1); }
