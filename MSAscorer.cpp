@@ -156,9 +156,9 @@ tuple<vector<int>,vector<int>> MapPositions(string &x, string &y, string &z) {
 	// Create the map for reference (y) based on the other reference (z)
 	int pos = 0;										// Sequence position number (observable character)
 	for(int i = 0; i < y.size(); i++) {
-		if(IsGap(z[i])) { y_int[i] = -i; }				// If aligned to a gap => label as -int
-		else { y_int[i] = i; }							// If aligned to a character => label as int
-		if(!IsGap(y[i])) { y_clean_int[pos++] = i; }    // Transfer that number to y_clean_int for mapping to x
+		if(IsGap(z[i])) { y_int[i] = -(i + 1); }				// If aligned to a gap => label as -int
+		else { y_int[i] = i + 1; }							// If aligned to a character => label as int
+		if(!IsGap(y[i])) { y_clean_int[pos++] = i + 1; }    // Transfer that number to y_clean_int for mapping to x
 	}
 	// Now build the x_int
 	pos = 0;											// Sequence position number (observable character)
